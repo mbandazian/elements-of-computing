@@ -13,5 +13,8 @@ CHIP Mux {
     OUT out;
 
     PARTS:
-    // Implementation missing.
+    Not(in=sel, out=nsel);
+    And(a=a, b=nsel, out=aout);
+    And(a=b, b=sel, out=bout);
+    Or(a=aout, b=bout, out=out);
 }
