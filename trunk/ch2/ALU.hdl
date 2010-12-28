@@ -41,5 +41,35 @@ CHIP ALU {
         ng; // 1 if out<0, 0 otherwise
 
     PARTS:
-    // Implementation missing.
+        // set x/y = 0 if zx/zy = 1
+        Mux16(a=x, b[0..15]=false, sel=zx, out=x0);
+        Mux16(a=y, b[0..15]=false, sel=zy, out=y0);
+  
+        // set x/y = !x/!y if nx/ny = 1 
+        Not16(in=x0, out=nx0);
+        Not16(in=y0, out=ny0);
+        Mux16(a=x0, b=nx0, sel=nx, out=x1);
+        Mux16(a=y0, b=ny0, sel=ny, out=y1);
+
+        // x+y
+        Add16(a=x1, b=y1, out=outsum);
+  
+        // x&y
+        And16(a=x1, b=y1, out=outand); 
+
+        // f=0 -> out = a & b, f=1 -> out = a + b
+        Mux16(b=outsum, a=outand, sel=f, out=out0);
+
+        // !out
+        Not16(in=out0, out=out1);
+
+        // no -> out = !out
+        Mux16(a=out0, b=out1, sel=no, out=out2);
+        And16(a=out2, b[0..15]=true, out=out);
+
+        // compute zr
+        Zero16(in=out2, out=zr);
+
+        // compute ng
+        Neg16(in=out2, out=ng);
 }
